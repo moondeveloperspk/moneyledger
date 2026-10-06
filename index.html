@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Money Ledger Pro V5</title>
+<style>
+:root{
+  --bg:#07111f; --bg2:#040a13; --panel:rgba(18,31,52,.78); --panel2:rgba(24,42,68,.88);
+  --text:#f5f8ff; --muted:#9baac0; --line:rgba(255,255,255,.10);
+  --green:#22c55e; --red:#fb4b63; --blue:#4f8cff; --orange:#ffb020;
+  --input:rgba(0,0,0,.23);
+}
+[data-theme="light"]{
+  --bg:#eef3ff; --bg2:#dbe7ff; --panel:rgba(255,255,255,.85); --panel2:rgba(255,255,255,.95);
+  --text:#0f1b2e; --muted:#6b7a93; --line:rgba(0,0,0,.08);
+  --input:rgba(255,255,255,.9);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;background:radial-gradient(circle at 15% 0%,#12345d 0,var(--bg) 40%,var(--bg2) 100%);
+  color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh;transition:.3s;
+}
+[data-theme="light"] body{background:radial-gradient(circle at 15% 0%,#cbd9ff 0,var(--bg) 40%,var(--bg2) 100%);}
+.app{max-width:650px;margin:auto;min-height:100vh;padding:18px 14px 28px}
+header{text-align:center;padding:8px 0 18px;position:relative}
+.theme-btn{position:absolute;right:0;top:0;background:var(--panel);border:1px solid var(--line);width:40px;height:40px;border-radius:12px;color:var(--text);font-size:18px;cursor:pointer}
+.logo{font-size:38px;margin-bottom:4px}
+h1{margin:0;font-size:25px;letter-spacing:.8px;font-weight:900}
+.subtitle{font-size:12px;color:var(--muted);margin-top:5px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 35px rgba(0,0,0,.15);backdrop-filter:blur(14px)}
+.card{padding:14px 10px;text-align:center}
+.card .label{font-size:10px;color:var(--muted);font-weight:700}
+.card .value{font-size:18px;font-weight:900;margin-top:5px}
+.green{color:var(--green)} .red{color:var(--red)} .blue{color:#75a7ff}
+.panel{padding:14px;margin-bottom:12px}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.panel-title h2{font-size:16px;margin:0}
+.badge{font-size:10px;padding:5px 8px;border-radius:99px;background:rgba(127,127,127,.15);color:var(--muted)}
+input,select{
+  width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);
+  border-radius:13px;padding:13px 12px;font-size:14px;outline:none;margin-bottom:9px;
+}
+input:focus,select:focus{border-color:#5e96ff;box-shadow:0 0 0 3px rgba(79,140,255,.12)}
+select option{background:#12213a}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{
+  border:0;border-radius:13px;padding:13px 12px;color:white;font-weight:900;font-size:13px;
+  cursor:pointer;transition:.15s;min-height:45px
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,#4f8cff,#765bff)}
+.btn-ghost{background:rgba(127,127,127,.12);border:1px solid var(--line);color:var(--text)}
+.search{margin-bottom:10px}
+.person{
+  border:1px solid var(--line);background:rgba(127,127,127,.06);border-radius:16px;padding:13px;margin:8px 0;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;transition:.15s;
+}
+.person:active{transform:scale(.98)}
+.name{font-weight:900;font-size:16px}
+.amount{text-align:right;font-weight:900;font-size:18px}
+.chev{color:var(--muted);font-size:18px;flex-shrink:0}
+.detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.detail-name{font-weight:900;font-size:20px}
+.detail-phone{font-size:12px;color:var(--muted);margin-top:4px}
+.detail-amount{font-weight:900;font-size:26px;text-align:center;margin:6px 0 16px}
+.detail-label{text-align:center;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+.person-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}
+.small-btn{border:0;border-radius:10px;padding:9px 3px;font-size:10px;font-weight:800;color:white;background:rgba(127,127,127,.15);cursor:pointer}
+.small-btn.green{background:rgba(34,197,94,.18);color:#16a34a}
+.small-btn.red{background:rgba(251,75,99,.18);color:#e11d48}
+.small-btn.blue{background:rgba(79,140,255,.18);color:#4f8cff}
+.small-btn.orange{background:rgba(255,176,32,.18);color:#b45309}
+[data-theme="dark"] .small-btn.green{color:#7cffaa} [data-theme="dark"] .small-btn.red{color:#ff91a1} [data-theme="dark"] .small-btn.blue{color:#91b8ff} [data-theme="dark"] .small-btn.orange{color:#ffd27a}
+.empty{text-align:center;color:var(--muted);padding:22px 10px;font-size:13px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10;padding:16px;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.modal-box{width:100%;max-width:620px;background:var(--panel2);border:1px solid var(--line);border-radius:24px 24px 10px 10px;padding:17px;max-height:90vh;overflow:auto;color:var(--text)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.modal-head h3{margin:0;font-size:18px}
+.close{background:rgba(127,127,127,.15);border:0;color:var(--text);border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer}
+.history-item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12px}
+.history-item:last-child{border-bottom:0}
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:10px}
+.about-box{background:linear-gradient(145deg,#08172b,#0c1b32 55%,#11152f);border:1px solid rgba(79,140,255,.45);box-shadow:0 0 35px rgba(40,100,255,.18);padding:16px;color:#f5f8ff}
+.about-header{display:flex;align-items:center;gap:11px;padding:4px 0 16px;border-bottom:1px solid rgba(79,140,255,.25)}
+.about-icon{font-size:42px;filter:drop-shadow(0 0 10px #ffb020)}
+.about-title{font-size:18px;font-weight:1000;letter-spacing:1px;background:linear-gradient(90deg,#4ff0b0,#4f8cff,#b26cff);-webkit-background-clip:text;color:transparent}
+.about-subtitle{font-size:8px;color:#9baac0;letter-spacing:.6px;margin-top:3px}
+.about-section{margin-top:14px;border:1px solid rgba(79,140,255,.4);border-radius:17px;padding:13px}
+.developer-section{background:linear-gradient(135deg,rgba(10,45,88,.5),rgba(6,20,40,.5))}
+.app-section{border-color:rgba(178,108,255,.5);background:linear-gradient(135deg,rgba(65,20,100,.24),rgba(8,20,40,.45))}
+.about-section-title{font-size:13px;font-weight:900;letter-spacing:.7px;color:#43c8ff;margin-bottom:9px}
+.app-section .about-section-title{color:#c181ff}
+.about-info{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed rgba(255,255,255,.13)}
+.about-info:last-child{border-bottom:0}
+.info-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,#315cff,#753dca);font-size:18px}
+.about-info small{display:block;color:#9baac0;font-size:10px}
+.about-info b{display:block;font-size:14px;margin-top:2px}
+.about-info .moon{color:#39e56c}
+.feature{display:flex;gap:9px;font-size:12px;line-height:1.4;padding:5px 0;color:#e9efff}
+.about-badges{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.about-badges>div{border:1px solid rgba(79,140,255,.55);border-radius:12px;padding:9px 3px;text-align:center;background:rgba(4,20,40,.5)}
+.about-badges strong{display:block;font-size:20px}
+.about-badges span{display:block;font-size:9px;font-weight:900;margin-top:3px}
+.about-badges small{display:block;color:#9baac0;font-size:8px;font-weight:600}
+.about-thanks{text-align:center;margin-top:14px;border:1px solid rgba(79,140,255,.35);border-radius:14px;padding:12px;color:#9baac0;font-size:10px}
+.about-thanks b{display:block;font-size:15px;background:linear-gradient(90deg,#4ff0b0,#4f8cff);-webkit-background-clip:text;color:transparent;margin-top:3px}
+@media(max-width:390px){.summary{gap:5px}.card{padding:11px 5px}.card .value{font-size:15px}.person-actions{grid-template-columns:repeat(2,1fr)}}
+.calc-fab{position:fixed;right:16px;bottom:16px;width:54px;height:54px;border-radius:16px;border:1px solid rgba(255,255,255,.25);background:linear-gradient(135deg,#4f8cff,#765bff);box-shadow:0 10px 25px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;cursor:grab;z-index:999;display:grid;place-items:center;padding:0;touch-action:none;user-select:none}
+.calc-fab:active{transform:scale(.94);cursor:grabbing}
+.calc-box{position:fixed;right:16px;bottom:76px;width:226px;background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 15px 40px rgba(0,0,0,.45);z-index:1000;display:none;backdrop-filter:blur(14px)}
+.calc-box.show{display:block}
+.calc-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:8px;letter-spacing:.4px;cursor:grab;touch-action:none;user-select:none}
+.calc-head:active{cursor:grabbing}
+.calc-close{background:rgba(127,127,127,.15);border:0;color:var(--text);border-radius:8px;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1}
+.calc-display{width:100%;text-align:right;font-size:19px;font-weight:800;padding:10px;border-radius:10px;background:var(--input);border:1px solid var(--line);color:var(--text);margin-bottom:8px;box-sizing:border-box;overflow-x:auto;white-space:nowrap}
+.nav-bar{display:flex;gap:8px;margin-bottom:12px}
+.nav-btn{flex:1;background:rgba(127,127,127,.15);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 6px;font-size:13px;font-weight:700;cursor:pointer}
+.nav-btn:active{opacity:.7}
+#navToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(15,23,42,.96);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;z-index:3000;display:none;max-width:90vw;text-align:center}
+.bk-btn{width:100%;margin-bottom:8px}
+#backupPaste{width:100%;min-height:80px;margin-bottom:8px;box-sizing:border-box;border-radius:12px;border:1px solid var(--line);background:rgba(127,127,127,.1);color:var(--text);padding:10px;font-size:12px;font-family:monospace}
+.calc-hist{font-size:12px;font-weight:600;color:var(--muted);min-height:16px;line-height:16px;overflow-x:auto;white-space:nowrap}
+.calc-main{font-size:20px;font-weight:800;line-height:26px;overflow-x:auto;white-space:nowrap}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.calc-grid button{border:0;border-radius:10px;padding:11px 0;font-size:14px;font-weight:800;background:rgba(127,127,127,.12);color:var(--text);cursor:pointer}
+.calc-grid button:active{transform:scale(.93)}
+.calc-op{background:rgba(79,140,255,.18)!important;color:#4f8cff!important}
+.calc-eq{background:linear-gradient(135deg,#4f8cff,#765bff)!important;color:#fff!important}
+@media(max-width:390px){.calc-box{width:200px;right:10px}.calc-fab{right:10px;bottom:12px}}
+</style>
+<style>
+#dlOverlay{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:radial-gradient(circle at 20% 0%, rgba(0,229,255,0.08), transparent 40%), radial-gradient(circle at 90% 100%, rgba(255,204,51,0.06), transparent 40%), rgba(3,5,10,0.98);font-family:'Share Tech Mono', monospace;}
+#dlBox{width:100%;max-width:380px;border:1px solid #1c2b3d;background:#0e1420;box-shadow:0 0 0 1px rgba(0,229,255,0.05), 0 20px 60px rgba(0,0,0,0.6);color:#d7e3f4;}
+#dlBox .dlHead{padding:14px 20px;border-bottom:1px solid #1c2b3d;background:linear-gradient(180deg, rgba(0,229,255,0.06), transparent);font-weight:700;font-size:13px;letter-spacing:2px;color:#00e5ff;}
+#dlBox .dlBody{padding:20px;}
+#dlBox .dlLock{font-size:30px;text-align:center;margin-bottom:10px;}
+#dlBox .dlDeviceLabel{font-size:11px;letter-spacing:1.5px;color:#5f7286;margin-bottom:4px;}
+#dlBox .dlDeviceId{font-size:15px;letter-spacing:1px;color:#ffcc33;background:#0b111c;border:1px solid #1c2b3d;padding:10px 12px;text-align:center;word-break:break-all;margin-bottom:8px;cursor:pointer;}
+#dlBox .dlRow{display:flex;gap:8px;margin-bottom:16px;}
+#dlBox .dlRow button{flex:1;width:auto;padding:9px 6px;font-size:11px;letter-spacing:1px;}
+#dlBox .dlRow #dlWaBtn{border-color:#25d366;color:#25d366;}
+#dlBox .dlRow #dlWaBtn:hover{background:#25d366;color:#04200e;}
+#dlBox input[type=text]{width:100%;background:#0b111c;border:1px solid #1c2b3d;color:#d7e3f4;padding:10px 12px;font-family:'Share Tech Mono', monospace;font-size:16px;outline:none;margin-bottom:10px;box-sizing:border-box;}
+#dlBox input:focus{border-color:#00e5ff;}
+#dlBox button{width:100%;padding:12px;background:transparent;border:1px solid #00e5ff;color:#00e5ff;font-weight:700;font-size:12px;letter-spacing:2px;cursor:pointer;}
+#dlBox button:hover{background:#00e5ff;color:#00151a;}
+#dlMsg{font-size:12px;margin-top:10px;min-height:16px;color:#ff5566;text-align:center;}
+#dlMsg.ok{color:#39ff88;}
+#dlNote{font-size:11px;color:#5f7286;margin-top:14px;line-height:1.6;text-align:center;}
+</style></head>
+<body data-theme="dark"><div id="dlOverlay"><div id="dlBox"><div class="dlHead">DEVICE LOCK</div><div class="dlBody"><div class="dlLock">&#128274;</div><div class="dlDeviceLabel">THIS DEVICE'S ID &mdash; tap to copy</div><div class="dlDeviceId" id="dlDeviceId">DETECTING...</div><div class="dlRow"><button id="dlCopyBtn" type="button">COPY ID</button><button id="dlWaBtn" type="button">SEND ON WHATSAPP</button></div><button id="dlOnlineBtn" type="button" style="display:none;margin-bottom:10px">ACTIVATE ONLINE</button><input type="text" id="dlKeyInput" placeholder="ACTIVATION KEY or MASTER PASSWORD" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button id="dlUnlockBtn">&gt;&gt; UNLOCK</button><div id="dlMsg"></div><div id="dlNote">Send the Device ID above to get an activation key for this device, or enter the master password.</div></div></div></div>
+<div class="app">
+<header>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  <div class="logo">💰</div>
+  <h1>MONEY LEDGER PRO</h1>
+  <div class="subtitle">Your personal lending & borrowing record</div>
+</header>
+
+<section class="summary">
+  <div class="card"><div class="label">TO RECEIVE</div><div id="totalReceive" class="value green">Rs 0</div></div>
+  <div class="card"><div class="label">TO PAY</div><div id="totalPay" class="value red">Rs 0</div></div>
+  <div class="card"><div class="label">BALANCE</div><div id="netBalance" class="value blue">Rs 0</div></div>
+</section>
+
+<section class="panel">
+  <div class="panel-title"><h2>📂 Categories</h2></div>
+  <div class="person" onclick="openList('receive')">
+    <div><div class="name">📥 To Receive</div><div style="font-size:11px;color:var(--muted);margin-top:3px" id="receiveCount">0 people</div></div>
+    <div style="display:flex;align-items:center;gap:8px"><div class="amount green" id="receiveCardTotal">Rs 0</div><span class="chev">›</span></div>
+  </div>
+  <div class="person" onclick="openList('pay')">
+    <div><div class="name">📤 To Pay</div><div style="font-size:11px;color:var(--muted);margin-top:3px" id="payCount">0 people</div></div>
+    <div style="display:flex;align-items:center;gap:8px"><div class="amount red" id="payCardTotal">Rs 0</div><span class="chev">›</span></div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-title"><h2>⚡ Quick Tools</h2></div>
+  <div class="row">
+    <button class="btn btn-ghost" onclick="openBackup()">📦 BACKUP</button>
+    <button class="btn btn-ghost" onclick="openBackup()">📥 RESTORE</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button class="btn btn-ghost" onclick="clearAll()">🗑 CLEAR ALL</button>
+    <button class="btn btn-ghost" onclick="showAbout()">ℹ️ ABOUT</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button class="btn btn-ghost" onclick="openSync()">☁️ CLOUD SYNC</button>
+    <button class="btn btn-ghost" onclick="syncNow(true)">🔄 SYNC NOW</button>
+  </div>
+  <div id="syncState" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center"></div>
+</section>
+</div>
+
+<!-- MODALS -->
+<div class="modal" id="aboutModal"><div class="modal-box about-box">
+  <div class="about-header"><div class="about-icon">💰</div><div><div class="about-title">MONEY LEDGER PRO</div><div class="about-subtitle">YOUR PERSONAL LENDING & BORROWING RECORD</div></div><button class="close" onclick="closeAbout()">×</button></div>
+  <div class="about-section developer-section"><div class="about-section-title">⚡ DEVELOPER INFORMATION</div>
+    <div class="about-info"><span class="info-icon">👤</span><div><small>Developed by</small><b>Qamar Sajid Ali</b></div></div>
+    <div class="about-info"><span class="info-icon">👑</span><div><small>Founder & Developer</small><b class="moon">Moon Developers</b></div></div>
+    <div class="about-info"><span class="info-icon">💬</span><div><small>WhatsApp</small><b>+92 300 6327876</b></div></div>
+    <div class="about-info"><span class="info-icon">✉️</span><div><small>Email</small><b>qamarsajidali@gmail.com</b></div></div>
+  </div>
+  <div class="about-section app-section"><div class="about-section-title">✦ ABOUT THIS APP V5</div>
+    <div class="feature">✓ <span>Light / Dark mode added</span></div>
+    <div class="feature">✓ <span>Search by name & phone</span></div>
+    <div class="feature">✓ <span>Image + PDF bill generation</span></div>
+    <div class="feature">✓ <span>100% Offline with auto backup</span></div>
+  </div>
+  <div class="about-badges">
+    <div><strong>🔒</strong><span>100%<small>PRIVATE</small></span></div>
+    <div><strong>☁️</strong><span>OFFLINE<small>STORAGE</small></span></div>
+    <div><strong>⚡</strong><span>FAST &<small>SIMPLE</small></span></div>
+    <div><strong>📱</strong><span>V5.0<small>NEW</small></span></div>
+  </div>
+  <div class="about-thanks">♡ THANK YOU FOR USING <b>MONEY LEDGER PRO</b><small>Version 5.0.0</small></div>
+</div></div>
+
+<div class="modal" id="backupModal"><div class="modal-box">
+  <div class="modal-head"><h3>📦 Backup & Restore</h3><button class="close" onclick="closeBackup()">×</button></div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">Apna data kisi mehfooz jagah save kar lein. Jo tareeqa aap ke device par chalay wohi istemal karein.</div>
+  <button class="btn btn-primary bk-btn" onclick="backupSave()">💾 SAVE FILE</button>
+  <button class="btn btn-ghost bk-btn" onclick="backupShare()">📤 SHARE (WhatsApp / Drive)</button>
+  <button class="btn btn-ghost bk-btn" onclick="backupCopy()">📋 COPY BACKUP TEXT</button>
+  <div style="font-size:11px;color:var(--muted);margin:12px 0 8px;font-weight:700">RESTORE</div>
+  <button class="btn btn-ghost bk-btn" onclick="importData()">📥 RESTORE FROM FILE</button>
+  <textarea id="backupPaste" placeholder="Ya yahan backup text paste karein..." spellcheck="false"></textarea>
+  <button class="btn btn-ghost bk-btn" onclick="restoreFromText()">📥 RESTORE FROM TEXT</button>
+  <input type="file" id="backupFile" style="display:none">
+  <div id="backupMsg" style="font-size:12px;color:var(--muted);line-height:1.5;min-height:16px"></div>
+</div></div>
+
+<div id="navToast"></div>
+
+<div class="modal" id="syncModal"><div class="modal-box">
+  <div class="modal-head"><h3>☁️ Cloud Sync</h3><button class="close" onclick="closeSync()">×</button></div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">Har device par wohi Database URL aur wohi Secret Code dalein. Net aate hi data khud sync ho jaye ga.</div>
+  <input id="syncUrl" placeholder="Firebase Database URL (https://...firebasedatabase.app)" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <input id="syncCode" placeholder="Secret code (kam az kam 8 characters)" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div id="syncStatus" style="font-size:11px;color:var(--muted);margin:-2px 0 10px 2px;min-height:14px"></div>
+  <div class="row"><button class="btn btn-primary" onclick="connectSync()">CONNECT</button><button class="btn btn-ghost" onclick="disconnectSync()">DISCONNECT</button></div>
+  <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.5">⚠️ Secret code kisi ko na batayen. Jis ko ye code pata ho wo aap ka data dekh sakta hy. Backup button phir bhi istemal karte rahein.</div>
+</div></div>
+
+<div class="modal" id="listModal"><div class="modal-box">
+  <div class="modal-head"><h3 id="sectionTitle">Money To Receive</h3><button class="close" onclick="closeListModal()">×</button></div>
+  <span class="badge" id="countBadge" style="display:inline-block;margin-bottom:10px">0 PEOPLE</span>
+  <input class="search" id="search" placeholder="🔎 Search by name or phone..." oninput="render()">
+  <div id="peopleList"></div>
+  <button class="btn btn-primary" style="width:100%;margin-top:5px" onclick="openAdd()">＋ ADD NEW PERSON</button>
+</div></div>
+
+<div class="modal" id="modal"><div class="modal-box">
+  <div class="modal-head"><h3 id="modalTitle">Add Person</h3><button class="close" onclick="closeModal()">×</button></div>
+  <input id="personName" placeholder="Person name *" autocomplete="off">
+  <div style="display:flex;gap:6px;margin-bottom:9px">
+    <input id="personPhone" placeholder="WhatsApp / Mobile number (optional)" inputmode="tel" autocomplete="off" style="margin-bottom:0;flex:1">
+    <button type="button" class="btn btn-ghost" onclick="pickContact()" style="min-width:52px;min-height:46px;padding:0 12px;font-size:18px" title="Pick from phonebook">📇</button>
+  </div>
+  <div id="contactSupportNote" style="font-size:10px;color:var(--muted);margin:-4px 0 10px 2px;display:none"></div>
+  <input id="personAmount" placeholder="Amount (Rs) *" type="number" min="0" inputmode="decimal">
+  <div class="row"><button class="btn btn-primary" onclick="savePerson()">SAVE RECORD</button><button class="btn btn-ghost" onclick="closeModal()">CANCEL</button></div>
+</div></div>
+
+<div class="modal" id="amountModal"><div class="modal-box">
+  <div class="modal-head"><h3 id="amountTitle">Add Amount</h3><button class="close" onclick="closeAmountModal()">×</button></div>
+  <input id="amountInput" placeholder="Amount (Rs)" type="number" min="0" inputmode="decimal">
+  <input id="amountNote" placeholder="Note (optional)" autocomplete="off">
+  <button class="btn btn-primary" style="width:100%" onclick="saveAmount()">CONFIRM</button>
+</div></div>
+
+<div class="modal" id="historyModal"><div class="modal-box">
+  <div class="modal-head"><h3 id="historyTitle">Transaction History</h3><button class="close" onclick="closeHistory()">×</button></div>
+  <div id="historyList"></div>
+</div></div>
+
+<div class="modal" id="detailModal"><div class="modal-box">
+  <div class="detail-head"><div><div class="detail-name" id="detailName"></div><div class="detail-phone" id="detailPhone"></div></div><button class="close" onclick="closeDetail()">×</button></div>
+  <div class="detail-label" id="detailLabel">BALANCE</div><div class="detail-amount" id="detailAmount"></div>
+  <div class="person-actions">
+    <button class="small-btn green" id="detailAddBtn">＋ ADD</button>
+    <button class="small-btn blue" id="detailPayBtn">💵 RECEIVED</button>
+    <button class="small-btn orange" onclick="hideDetail();showHistory(detailId)">📜 HISTORY</button>
+    <button class="small-btn blue" onclick="sendWhatsApp(detailId)">💬 WA</button>
+  </div>
+  <div class="person-actions">
+    <button class="small-btn blue" onclick="sendSMS(detailId)">📱 SMS</button>
+    <button class="small-btn orange" onclick="hideDetail();editPerson(detailId)">✏️ EDIT</button>
+    <button class="small-btn red" onclick="deleteFromDetail()">🗑 DELETE</button>
+  </div>
+  <div class="person-actions" style="grid-template-columns:1fr"><button class="small-btn green" onclick="hideDetail();showBillCard(detailId)">🧾 GENERATE BILL / REPORT</button></div>
+</div></div>
+
+<div class="modal" id="billModal"><div class="modal-box">
+  <div class="modal-head"><h3>Bill / Report</h3><button class="close" onclick="closeBillModal()">×</button></div>
+  <div style="width:100%;overflow:auto;max-height:52vh;border-radius:14px;margin-bottom:12px;background:#0b1526;padding:8px"><canvas id="billCanvas" style="width:100%;display:block;border-radius:10px"></canvas></div>
+  <div class="person-actions" style="grid-template-columns:1fr 1fr 1fr">
+    <button class="small-btn blue" id="billDownloadBtn">🖼️ IMAGE</button>
+    <button class="small-btn red" id="billPdfBtn">📄 PDF</button>
+    <button class="small-btn green" id="billShareBtn">💬 SHARE</button>
+  </div>
+</div></div>
+
+<!-- FLOATING MINI CALCULATOR (visible on every screen) -->
+<button class="calc-fab" id="calcFab" title="Calculator (drag to move)">
+  <svg viewBox="0 0 24 24" width="27" height="27" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="2" width="16" height="20" rx="3.2" fill="rgba(255,255,255,.10)" stroke="#fff" stroke-width="1.4"/>
+    <rect x="6.3" y="4.3" width="11.4" height="4.6" rx="1.1" fill="#7cffc4"/>
+    <rect x="8.4" y="6" width="1.4" height="1.4" rx=".3" fill="#0a1c14" opacity=".55"/>
+    <circle cx="7.9" cy="12.1" r="1.15" fill="#fff"/>
+    <circle cx="12" cy="12.1" r="1.15" fill="#fff"/>
+    <circle cx="16.1" cy="12.1" r="1.15" fill="#fff"/>
+    <circle cx="7.9" cy="15.6" r="1.15" fill="#fff"/>
+    <circle cx="12" cy="15.6" r="1.15" fill="#fff"/>
+    <circle cx="16.1" cy="15.6" r="1.15" fill="#fff"/>
+    <circle cx="7.9" cy="19.1" r="1.15" fill="#fff"/>
+    <circle cx="12" cy="19.1" r="1.15" fill="#fff"/>
+    <rect x="14.4" y="17.95" width="3.4" height="2.3" rx="1.15" fill="#ffb020"/>
+  </svg>
+</button>
+<div class="calc-box" id="calcBox">
+  <div class="calc-head" id="calcHead"><span>⠿ CALCULATOR (drag)</span><button class="calc-close" onclick="toggleCalc()">×</button></div>
+  <div class="calc-display"><div id="calcHist" class="calc-hist"></div><div id="calcDisplay" class="calc-main">0</div></div>
+  <div class="calc-grid">
+    <button onclick="calcClear()">C</button>
+    <button onclick="calcBackspace()">⌫</button>
+    <button onclick="calcPercent()">%</button>
+    <button class="calc-op" onclick="calcInput('/')">÷</button>
+    <button onclick="calcInput('7')">7</button>
+    <button onclick="calcInput('8')">8</button>
+    <button onclick="calcInput('9')">9</button>
+    <button class="calc-op" onclick="calcInput('*')">×</button>
+    <button onclick="calcInput('4')">4</button>
+    <button onclick="calcInput('5')">5</button>
+    <button onclick="calcInput('6')">6</button>
+    <button class="calc-op" onclick="calcInput('-')">−</button>
+    <button onclick="calcInput('1')">1</button>
+    <button onclick="calcInput('2')">2</button>
+    <button onclick="calcInput('3')">3</button>
+    <button class="calc-op" onclick="calcInput('+')">+</button>
+    <button onclick="calcInput('0')" style="grid-column:span 2">0</button>
+    <button onclick="calcInput('.')">.</button>
+    <button class="calc-eq" onclick="calcEquals()">=</button>
+  </div>
+</div>
+
+<script>
+const KEY='money_ledger_pro_v1';
+const THEME_KEY='ml_theme';
+let data=JSON.parse(localStorage.getItem(KEY)||'{"receive":[],"pay":[]}');
+let currentTab='receive', editingId=null, amountMode=null, detailId=null;
+let billBlob=null, billPersonName='', billCanvasRef=null;
+
+function initTheme(){
+  const saved=localStorage.getItem(THEME_KEY)||'dark';
+  document.body.setAttribute('data-theme',saved);
+  document.getElementById('themeBtn').textContent=saved==='dark'?'🌙':'☀️';
+}
+function toggleTheme(){
+  const cur=document.body.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.body.setAttribute('data-theme',next);
+  localStorage.setItem(THEME_KEY,next);
+  document.getElementById('themeBtn').textContent=next==='dark'?'🌙':'☀️';
+}
+function money(n){return 'Rs '+Number(n||0).toLocaleString('en-PK',{maximumFractionDigits:2})}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));lsSet(REV_KEY,String(getRev(REV_KEY)+1));render();schedulePush()}
+function findPerson(id){return data.receive.find(x=>x.id===id)||data.pay.find(x=>x.id===id)||data[currentTab].find(x=>x.id===id)}
+function findPersonWithTab(id){
+  let p=data.receive.find(x=>x.id===id); if(p) return {p,tab:'receive'};
+  p=data.pay.find(x=>x.id===id); if(p) return {p,tab:'pay'};
+  return null;
+}
+function openList(tab){currentTab=tab;document.getElementById('search').value='';document.getElementById('listModal').classList.add('show');render();}
+function closeListModal(){document.getElementById('listModal').classList.remove('show')}
+function backToList(){document.getElementById('listModal').classList.add('show');render()}
+function closeModal(){document.getElementById('modal').classList.remove('show');backToList()}
+function openAdd(){closeListModal();editingId=null;document.getElementById('modalTitle').textContent='Add Person';document.getElementById('personName').value='';document.getElementById('personPhone').value='';document.getElementById('personAmount').value='';const n=document.getElementById('contactSupportNote');if(n)n.style.display='none';document.getElementById('modal').classList.add('show');checkContactSupport();setTimeout(()=>document.getElementById('personName').focus(),100);}
+function editPerson(id){const p=findPerson(id);if(!p)return;editingId=id;document.getElementById('modalTitle').textContent='Edit Person';document.getElementById('personName').value=p.name;document.getElementById('personPhone').value=p.phone||'';document.getElementById('personAmount').value=p.balance;const n=document.getElementById('contactSupportNote');if(n)n.style.display='none';document.getElementById('modal').classList.add('show');checkContactSupport();}
+function savePerson(){
+  const name=document.getElementById('personName').value.trim();
+  const phone=document.getElementById('personPhone').value.trim();
+  const amountRaw=document.getElementById('personAmount').value;
+  const amount=Number(amountRaw);
+  if(!name){alert('Please enter name.');return}
+  if(amountRaw===''||isNaN(amount)||amount<0){alert('Please enter valid amount.');return}
+  if(editingId){
+    const found=findPersonWithTab(editingId);
+    if(found){
+      found.p.name=name;found.p.phone=phone;
+      if(found.p.balance!==amount){const diff=amount-found.p.balance;found.p.balance=amount;found.p.history.push({type:diff>0?'add':'payment',amount:Math.abs(diff),date:new Date().toLocaleString(),note:'Edited balance'})}
+      save();closeModal();return;
+    }
+  }
+  const now=new Date().toLocaleString();
+  const person={id:Date.now(),name,phone,balance:amount,history:[{type:'opening',amount,date:now,note:'Opening balance'}]};
+  data[currentTab].push(person);save();closeModal();
+}
+function openAmount(id,mode){editingId=id;amountMode=mode;document.getElementById('amountTitle').textContent=mode==='add'?'Add More Amount':'Record Received / Paid';document.getElementById('amountInput').value='';document.getElementById('amountNote').value='';document.getElementById('amountModal').classList.add('show');}
+function closeAmountModal(){document.getElementById('amountModal').classList.remove('show');backToList()}
+function saveAmount(){
+  const amount=Number(document.getElementById('amountInput').value);
+  if(!amount||amount<=0){alert('Enter valid amount >0');return}
+  const found=findPersonWithTab(editingId);if(!found)return;
+  const p=found.p, tab=found.tab;
+  const note=document.getElementById('amountNote').value.trim();
+  const date=new Date().toLocaleString();
+  if(amountMode==='add'){
+    p.balance+=amount;p.history.push({type:'add',amount,date,note:note||'Additional amount'});
+  }else{
+    if(amount>p.balance){
+      const excess=amount-p.balance;
+      if(p.balance>0){p.history.push({type:'payment',amount:p.balance,date,note:note||'Full settled'});}
+      p.balance=0;
+      const oppTab=tab==='receive'?'pay':'receive';
+      let opp=data[oppTab].find(x=>x.name.trim().toLowerCase()===p.name.trim().toLowerCase() && (x.phone||'').trim()===(p.phone||'').trim());
+      if(opp){
+        opp.balance+=excess;
+        opp.history.push({type:'add',amount:excess,date,note:'Carried over: excess payment ('+p.name+')'});
+      }else{
+        opp={id:Date.now()+Math.floor(Math.random()*1000),name:p.name,phone:p.phone,balance:excess,history:[{type:'opening',amount:excess,date,note:'Carried over: excess payment'}]};
+        data[oppTab].push(opp);
+      }
+      alert((tab==='receive'?'Received':'Paid')+' amount was more than the balance.\nExtra '+money(excess)+' auto-added to "'+(oppTab==='receive'?'To Receive':'To Pay')+'" for '+p.name+'.');
+    }else{
+      p.balance-=amount;p.history.push({type:'payment',amount,date,note:note||'Payment received'});
+    }
+  }
+  save();closeAmountModal();
+}
+function showDetail(id){const p=findPerson(id);if(!p)return;detailId=id;closeListModal();document.getElementById('detailName').textContent=p.name;document.getElementById('detailPhone').textContent=p.phone||'No phone added';document.getElementById('detailLabel').textContent=currentTab==='receive'?'TO RECEIVE':'TO PAY';const amt=document.getElementById('detailAmount');amt.textContent=money(p.balance);amt.className='detail-amount '+(currentTab==='receive'?'green':'red');document.getElementById('detailAddBtn').className='small-btn '+(currentTab==='receive'?'green':'red');document.getElementById('detailAddBtn').onclick=()=>{hideDetail();openAmount(p.id,'add')};document.getElementById('detailPayBtn').textContent=currentTab==='receive'?'💵 RECEIVED':'💵 PAID';document.getElementById('detailPayBtn').onclick=()=>{hideDetail();openAmount(p.id,'payment')};document.getElementById('detailModal').classList.add('show');}
+function hideDetail(){document.getElementById('detailModal').classList.remove('show')}
+function closeDetail(){hideDetail();backToList()}
+function deleteFromDetail(){if(!detailId)return;deletePerson(detailId);closeDetail();}
+function showHistory(id){const p=findPerson(id);if(!p)return;document.getElementById('historyTitle').textContent=p.name+' — History';document.getElementById('historyList').innerHTML=p.history.slice().reverse().map(h=>{let label=h.type==='add'?'➕ Added':h.type==='payment'?'✅ Received/Paid':'📌 Opening';let sign=h.type==='payment'?'−':'+';return `<div class="history-item"><div><b>${label}</b><br><span style="color:var(--muted)">${h.date}<br>${escapeHtml(h.note||'')}</span></div><b class="${h.type==='payment'?'green':'red'}">${sign}${money(h.amount)}</b></div>`}).join('');document.getElementById('historyModal').classList.add('show');}
+function closeHistory(){document.getElementById('historyModal').classList.remove('show');backToList()}
+function deletePerson(id){if(!confirm('Delete this record?'))return;const f=findPersonWithTab(id);if(!f)return;data[f.tab]=data[f.tab].filter(x=>x.id!==id);save();}
+function checkContactSupport(){
+  const note=document.getElementById('contactSupportNote');
+  if(!note) return;
+  const hasWeb = 'contacts' in navigator && 'ContactsManager' in window;
+  const hasNative = window.AndroidBridge && typeof window.AndroidBridge.pickContactNative === 'function';
+  if(hasWeb || hasNative){
+    note.style.display='none';
+  } else {
+    note.style.display='block';
+    note.innerHTML='⚠️ Ye phonebook feature Chrome Android / APK me kaam karta hai. Browser support na kare to manually likhna hoga.';
+  }
+}
+// Called by Android native contact picker
+window.onNativeContactPicked = function(name, phone){
+  if(name) document.getElementById('personName').value=name;
+  if(phone) document.getElementById('personPhone').value=phone;
+  const note=document.getElementById('contactSupportNote');
+  if(note){note.style.display='block';note.style.color='#22c55e';note.textContent='✓ Contact se pick ho gaya: '+(name||phone);}
+};
+
+async function pickContact(){
+  // 1. Try native Android bridge first (for APK)
+  if(window.AndroidBridge && typeof window.AndroidBridge.pickContactNative === 'function'){
+    try{
+      if(typeof window.AndroidBridge.hasContactsPermission === 'function' && !window.AndroidBridge.hasContactsPermission()){
+        window.AndroidBridge.requestContactsPermission();
+        // small delay then launch
+        setTimeout(()=>{ window.AndroidBridge.pickContactNative(); }, 500);
+      } else {
+        window.AndroidBridge.pickContactNative();
+      }
+      return;
+    }catch(e){ console.log('native picker failed', e); }
+  }
+  // 2. Try Web Contact Picker API (Chrome Android)
+  try{
+    if('contacts' in navigator && 'ContactsManager' in window){
+      const contacts=await navigator.contacts.select(['name','tel'], {multiple:false});
+      if(!contacts || !contacts.length) return;
+      const c=contacts[0];
+      const name=c.name && c.name[0] ? c.name[0] : '';
+      const tel=c.tel && c.tel[0] ? c.tel[0] : '';
+      if(name) document.getElementById('personName').value=name;
+      if(tel) document.getElementById('personPhone').value=tel;
+      const note=document.getElementById('contactSupportNote');
+      if(note){note.style.display='block';note.style.color='#22c55e';note.textContent='✓ Contact se pick ho gaya: '+(name||tel);}
+      return;
+    }
+  }catch(err){
+    if(err.name!=='AbortError'){ console.log(err); }
+    if(err.name==='NotAllowedError' || err.name==='SecurityError'){
+      alert('Contact permission deny hai. Dobara allow karein.');
+      return;
+    }
+  }
+  // 3. Fallback
+  alert('Sorry, aapka browser direct phonebook access support nahi karta.\n\nAPK banane ke baad (is updated generator se) ye feature 100% kaam karega.');
+}
+function sendWhatsApp(id){const p=findPerson(id);if(!p)return;if(!p.phone){alert('Please add WhatsApp number first.');return}const msg=currentTab==='receive'?`Assalam o Alaikum ${p.name}, aap ki taraf hamare ${money(p.balance)} baqi hain. Meharbani kar ke payment kar dein. Shukriya.`:`Assalam o Alaikum ${p.name}, hamari taraf aap ke ${money(p.balance)} baqi hain. Payment jald kar denge. Shukriya.`;openWhatsAppText(p.phone,msg);}
+function sendSMS(id){const p=findPerson(id);if(!p)return;if(!p.phone){alert('Please add mobile number first.');return}const msg=currentTab==='receive'?`Assalam o Alaikum ${p.name}, aap ki taraf hamare ${money(p.balance)} baqi hain.`:`Assalam o Alaikum ${p.name}, hamari taraf aap ke ${money(p.balance)} baqi hain.`;window.location.href='sms:'+p.phone+'?body='+encodeURIComponent(msg);}
+
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function showBillCard(id){
+  const p=findPerson(id);if(!p)return;
+  const canvas=document.getElementById('billCanvas');const ctx=canvas.getContext('2d');
+  const history=p.history||[];
+  const W=720,rowH=42,headerH=145,tableHeadH=44,balanceH=110,footerH=90;
+  let H=headerH+tableHeadH+(history.length*rowH)+balanceH+footerH+60;
+  const minH=Math.round(W*1.3); // keep the bill portrait-shaped even with few entries, so PDF/image never renders wider than tall
+  if(H<minH) H=minH;
+  canvas.width=W;canvas.height=H;canvas.style.width='100%';canvas.style.height='auto';
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,W,0);grad.addColorStop(0,'#4f8cff');grad.addColorStop(1,'#795cff');ctx.fillStyle=grad;ctx.fillRect(0,0,W,headerH);
+  ctx.fillStyle='#fff';ctx.font='800 26px Arial';ctx.fillText('MONEY LEDGER PRO',28,48);ctx.font='600 13px Arial';ctx.fillText('Account Statement',28,70);ctx.font='600 12px Arial';ctx.fillText(p.name,28,96);if(p.phone)ctx.fillText(p.phone,28,114);
+  // Dedicated background band for the table header labels, kept fully separate from the row area below so a row's background can never overlap/cut this text
+  ctx.fillStyle='#eef1f7';ctx.fillRect(0,headerH,W,tableHeadH);
+  ctx.fillStyle='#0f1b2e';ctx.font='700 11px Arial';ctx.fillText('DATE',40,headerH+28);ctx.fillText('DESCRIPTION',180,headerH+28);ctx.textAlign='right';ctx.fillText('AMOUNT',W-40,headerH+28);ctx.textAlign='left';
+  const rowsStartY=headerH+tableHeadH;let rowTop=rowsStartY,y=rowsStartY+27;
+  history.forEach((h,i)=>{if(i%2===0){ctx.fillStyle='#f8f9fc';ctx.fillRect(24,rowTop,W-48,rowH);}const label=h.type==='opening'?'Opening Balance':h.type==='payment'?'Payment Received':'Amount Added';const sign=h.type==='payment'?'-':'+';ctx.fillStyle='#33445e';ctx.font='600 12px Arial';ctx.fillText((h.date||'').split(',')[0],40,y);ctx.fillStyle='#0f1b2e';ctx.font='600 13px Arial';ctx.fillText(label,180,y);ctx.fillStyle=h.type==='payment'?'#16a34a':'#e11d48';ctx.font='700 13px Arial';ctx.textAlign='right';ctx.fillText(sign+money(h.amount),W-40,y);ctx.textAlign='left';rowTop+=rowH;y+=rowH;});
+  y+=20;const isReceive=currentTab==='receive';const balGrad=ctx.createLinearGradient(24,y,W-24,y+balanceH-20);if(isReceive){balGrad.addColorStop(0,'#16a34a');balGrad.addColorStop(1,'#22c55e');}else{balGrad.addColorStop(0,'#e11d48');balGrad.addColorStop(1,'#fb4b63');}ctx.fillStyle=balGrad;roundRect(ctx,24,y,W-48,balanceH-20,16);ctx.fill();ctx.fillStyle='#fff';ctx.font='700 13px Arial';ctx.fillText(isReceive?'TOTAL TO RECEIVE':'TOTAL TO PAY',44,y+32);ctx.font='800 28px Arial';ctx.fillText(money(p.balance),44,y+64);y+=balanceH;
+  ctx.strokeStyle='#d7dce6';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(24,y+16);ctx.lineTo(W-24,y+16);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#5b6577';ctx.font='700 13px Arial';ctx.textAlign='center';ctx.fillText('Thank you! ♡',W/2,y+44);ctx.fillStyle='#9aa4b5';ctx.font='600 11px Arial';ctx.fillText('Generated by Money Ledger Pro V2',W/2,y+62);ctx.textAlign='left';
+  billPersonName=p.name;billCanvasRef=canvas;
+  canvas.toBlob(blob=>{billBlob=blob;},'image/png');
+  document.getElementById('billDownloadBtn').onclick=()=>downloadBill();
+  document.getElementById('billPdfBtn').onclick=()=>downloadBillPDF();
+  document.getElementById('billShareBtn').onclick=()=>shareBillOnWhatsApp(p);
+  document.getElementById('billModal').classList.add('show');
+}
+function closeBillModal(){document.getElementById('billModal').classList.remove('show');backToList()}
+function billFileName(ext){return 'Bill_'+String(billPersonName||'bill').replace(/[^a-z0-9]/gi,'_')+'.'+ext;}
+function downloadBill(){
+  const canvas=document.getElementById('billCanvas');
+  canvas.toBlob(async blob=>{exportFeedback(await exportFile(blob,billFileName('png'),'Bill'),'bill');},'image/png');
+}
+function sliceCanvas(src,sy,sh,W,outH){const c=document.createElement('canvas');c.width=W;c.height=outH;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,W,outH);x.drawImage(src,0,sy,W,sh,0,0,W,sh);return c;}
+// Minimal offline PDF writer: one JPEG image per page (no external library needed)
+function canvasesToPdfBlob(canvases,wPt,hPt){
+  const enc=new TextEncoder(),parts=[],offsets=[];let pos=0;
+  const push=x=>{const b=typeof x==='string'?enc.encode(x):x;parts.push(b);pos+=b.length;};
+  const n=canvases.length,total=2+n*3;
+  push('%PDF-1.4\n');
+  offsets[1]=pos;push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  const kids=[];for(let i=0;i<n;i++)kids.push((3+i*3)+' 0 R');
+  offsets[2]=pos;push('2 0 obj\n<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>\nendobj\n');
+  for(let i=0;i<n;i++){
+    const pid=3+i*3,cid=4+i*3,iid=5+i*3,cv=canvases[i];
+    const b64=cv.toDataURL('image/jpeg',0.92).split(',')[1],bin=atob(b64),jpg=new Uint8Array(bin.length);
+    for(let k=0;k<bin.length;k++)jpg[k]=bin.charCodeAt(k);
+    const content='q '+wPt+' 0 0 '+hPt+' 0 0 cm /Im0 Do Q';
+    offsets[pid]=pos;push(pid+' 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+wPt+' '+hPt+'] /Resources << /XObject << /Im0 '+iid+' 0 R >> >> /Contents '+cid+' 0 R >>\nendobj\n');
+    offsets[cid]=pos;push(cid+' 0 obj\n<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream\nendobj\n');
+    offsets[iid]=pos;push(iid+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+cv.width+' /Height '+cv.height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n');
+    push(jpg);push('\nendstream\nendobj\n');
+  }
+  const xref=pos;let x='xref\n0 '+(total+1)+'\n0000000000 65535 f \n';
+  for(let i=1;i<=total;i++)x+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  push(x+'trailer\n<< /Size '+(total+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF');
+  return new Blob(parts,{type:'application/pdf'});
+}
+async function downloadBillPDF(){
+  if(!billCanvasRef){alert('Bill not ready');return;}
+  try{
+    const canvas=billCanvasRef,W=canvas.width,H=canvas.height,wPt=Math.round(W*0.75),maxPagePx=Math.round(W*1.414),pages=[];let hPt;
+    if(H<=maxPagePx*1.05){hPt=Math.round(H*0.75);pages.push(sliceCanvas(canvas,0,H,W,H));}
+    else{hPt=Math.round(maxPagePx*0.75);const count=Math.ceil(H/maxPagePx);for(let i=0;i<count;i++){const sy=i*maxPagePx;pages.push(sliceCanvas(canvas,sy,Math.min(maxPagePx,H-sy),W,maxPagePx));}}
+    exportFeedback(await exportFile(canvasesToPdfBlob(pages,wPt,hPt),billFileName('pdf'),'Bill'),'bill');
+  }catch(e){alert('PDF nahi ban saka: '+(e&&e.message?e.message:e));}
+}
+function billText(p){
+  const lines=(p.history||[]).slice(-12).map(x=>{const t=x.type==='payment'?'Payment':x.type==='opening'?'Opening':'Added';const sg=x.type==='payment'?'-':'+';return x.date+' | '+t+' '+sg+money(x.amount)+(x.note?' ('+x.note+')':'');});
+  return p.name+' - Statement\n'+lines.join('\n')+'\n\nBalance: '+money(p.balance)+'\nMoney Ledger Pro';
+}
+async function shareBillOnWhatsApp(p){
+  const canvas=document.getElementById('billCanvas');
+  canvas.toBlob(async blob=>{
+    const st=await exportFile(blob,'Bill_'+String(p.name).replace(/[^a-z0-9]/gi,'_')+'.png','Bill - '+p.name,{shareOnly:true});
+    if(st==='shared'||st==='cancel')return;
+    openWhatsAppText(p.phone,billText(p)); // file sharing not available here: send the statement as text
+  },'image/png');
+}
+function render(){
+  const receive=data.receive.reduce((s,p)=>s+Number(p.balance||0),0);
+  const pay=data.pay.reduce((s,p)=>s+Number(p.balance||0),0);
+  document.getElementById('totalReceive').textContent=money(receive);
+  document.getElementById('totalPay').textContent=money(pay);
+  document.getElementById('netBalance').textContent=money(receive-pay);
+  document.getElementById('receiveCardTotal').textContent=money(receive);
+  document.getElementById('payCardTotal').textContent=money(pay);
+  document.getElementById('receiveCount').textContent=data.receive.length+' people';
+  document.getElementById('payCount').textContent=data.pay.length+' people';
+  document.getElementById('sectionTitle').textContent=currentTab==='receive'?'Money To Receive':'Money To Pay';
+  const list=data[currentTab];
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  const filtered=q===''?list:list.filter(p=>p.name.toLowerCase().includes(q)||(p.phone||'').toLowerCase().includes(q));
+  document.getElementById('countBadge').textContent=list.length+' PEOPLE';
+  const box=document.getElementById('peopleList');
+  if(!filtered.length){box.innerHTML='<div class="empty">No records found.<br>Tap ADD NEW PERSON to start.</div>';return}
+  box.innerHTML=filtered.map(p=>`<div class="person" onclick="showDetail(${p.id})"><div class="name">${escapeHtml(p.name)}<div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml(p.phone||'No phone')}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="amount ${currentTab==='receive'?'green':'red'}">${money(p.balance)}</div><span class="chev">›</span></div></div>`).join('');
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function clearAll(){if(confirm(syncCfg()?'Delete ALL records? Cloud sync on hy, is liye cloud ka data bhi delete ho jaye ga.':'Delete ALL records?')){data={receive:[],pay:[]};save()}}
+function showAbout(){document.getElementById('aboutModal').classList.add('show');}
+function closeAbout(){document.getElementById('aboutModal').classList.remove('show');}
+// ===== CLOUD SYNC (Firebase Realtime Database via REST, secret-code based) =====
+const SYNC_CFG='ml_sync_cfg', REV_KEY='ml_rev', SREV_KEY='ml_srev', LASTSYNC_KEY='ml_last_sync', PREV_KEY='ml_prev_backup';
+const DEFAULT_DB_URL='https://moondevolpers-default-rtdb.asia-southeast1.firebasedatabase.app'; // optional: paste your Firebase Database URL here so it is pre-filled on every device
+let syncBusy=false, syncAgain=false, pushTimer=null;
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function getRev(k){return parseInt(lsGet(k)||'0',10)||0}
+function syncCfg(){try{const c=JSON.parse(lsGet(SYNC_CFG)||'null');return c&&c.url&&c.code?c:null}catch(e){return null}}
+function cleanUrl(u){u=(u||'').trim().replace(/\/+$/,'');if(u&&!/^https?:\/\//i.test(u))u='https://'+u;return u}
+// Pure-JS SHA-256 so the cloud path is identical on every device/browser/WebView
+function sha256hex(str){
+  const utf=unescape(encodeURIComponent(str));
+  const K=[],H=[];let n=2,cnt=0;
+  while(cnt<64){let p=true;for(let i=2;i*i<=n;i++){if(n%i===0){p=false;break;}}
+    if(p){if(cnt<8)H[cnt]=(Math.pow(n,.5)%1*4294967296)|0;K[cnt]=(Math.pow(n,1/3)%1*4294967296)|0;cnt++;}n++;}
+  const bytes=[];for(let i=0;i<utf.length;i++)bytes.push(utf.charCodeAt(i));
+  const bitLen=utf.length*8;bytes.push(0x80);while(bytes.length%64!==56)bytes.push(0);
+  for(let i=7;i>=0;i--)bytes.push(i>=4?0:(bitLen>>>(i*8))&255);
+  const rotr=(x,r)=>(x>>>r)|(x<<(32-r));
+  for(let o=0;o<bytes.length;o+=64){
+    const w=new Array(64);
+    for(let i=0;i<16;i++)w[i]=(bytes[o+i*4]<<24)|(bytes[o+i*4+1]<<16)|(bytes[o+i*4+2]<<8)|bytes[o+i*4+3];
+    for(let i=16;i<64;i++){const s0=rotr(w[i-15],7)^rotr(w[i-15],18)^(w[i-15]>>>3);const s1=rotr(w[i-2],17)^rotr(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
+    let [a,b,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){
+      const S1=rotr(e,6)^rotr(e,11)^rotr(e,25),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[i]+w[i])|0;
+      const S0=rotr(a,2)^rotr(a,13)^rotr(a,22),mj=(a&b)^(a&c)^(b&c),t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('');
+}
+function ledgerId(code){return sha256hex('moon-ledger:'+String(code).trim());}
+async function cloudReq(cfg,id,method,body){
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),15000);
+  try{
+    const r=await fetch(cfg.url+'/ledgers/'+id+'.json',{method:method,body:body,headers:body?{'Content-Type':'application/json'}:undefined,signal:ctrl.signal,cache:'no-store'});
+    if(!r.ok){const er=new Error('HTTP '+r.status);er.status=r.status;throw er;}
+    return await r.json();
+  }finally{clearTimeout(to);}
+}
+function parseRemote(raw){
+  if(!raw||typeof raw.d!=='string')return null;
+  const d=JSON.parse(raw.d);
+  if(!d||!Array.isArray(d.receive)||!Array.isArray(d.pay))return null;
+  return {rev:parseInt(raw.rev,10)||0,data:d};
+}
+function pullRemote(remote){
+  lsSet(PREV_KEY,JSON.stringify(data)); // safety copy of this device's data before it is replaced
+  data=remote.data;
+  lsSet(KEY,JSON.stringify(data));
+  lsSet(REV_KEY,String(remote.rev));lsSet(SREV_KEY,String(remote.rev));
+  render();
+}
+async function pushLocal(cfg,id,rev){
+  await cloudReq(cfg,id,'PUT',JSON.stringify({rev:rev,t:Date.now(),d:JSON.stringify(data)}));
+  lsSet(REV_KEY,String(rev));lsSet(SREV_KEY,String(rev));
+}
+function syncErrText(e){
+  if(e&&(e.status===401||e.status===403))return 'Permission denied - Firebase Rules check karein';
+  if(e&&e.name==='AbortError')return 'Net slow hy ya band hy';
+  return 'Net/URL check karein ('+(e&&e.message?e.message:'error')+')';
+}
+function setSyncState(t){const a=document.getElementById('syncState'),b=document.getElementById('syncStatus');if(a)a.textContent=t;if(b)b.textContent=t;}
+function refreshSyncLabel(){
+  const cfg=syncCfg();
+  if(!cfg){setSyncState('☁️ Cloud sync: off');return;}
+  const t=parseInt(lsGet(LASTSYNC_KEY)||'0',10);
+  setSyncState('☁️ Cloud sync: on'+(t?' • last sync '+new Date(t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):''));
+}
+async function syncNow(manual){
+  const cfg=syncCfg();
+  if(!cfg){if(manual)openSync();return;}
+  if(syncBusy){syncAgain=true;return;}
+  syncBusy=true;setSyncState('⏳ Syncing...');
+  try{
+    const id=ledgerId(cfg.code);
+    const remote=parseRemote(await cloudReq(cfg,id,'GET'));
+    const lrev=getRev(REV_KEY),srev=getRev(SREV_KEY);
+    if(!remote){await pushLocal(cfg,id,Math.max(lrev,1));}
+    else{
+      const localChanged=lrev>srev,remoteChanged=remote.rev>srev;
+      if(localChanged&&remoteChanged){
+        if(confirm('Is device aur cloud, dono par alag changes hain.\n\nOK = Cloud ka data lein (is device ka data replace hoga)\nCancel = Is device ka data rakhein aur cloud update karein'))pullRemote(remote);
+        else await pushLocal(cfg,id,Math.max(lrev,remote.rev)+1);
+      }
+      else if(remoteChanged){pullRemote(remote);}
+      else if(localChanged){await pushLocal(cfg,id,lrev);}
+    }
+    lsSet(LASTSYNC_KEY,String(Date.now()));refreshSyncLabel();
+  }catch(e){
+    setSyncState('⚠️ Sync nahi hua: '+syncErrText(e));
+    if(manual)alert('Sync nahi hua: '+syncErrText(e));
+  }finally{
+    syncBusy=false;
+    if(syncAgain){syncAgain=false;schedulePush();}
+  }
+}
+function schedulePush(){if(!syncCfg())return;clearTimeout(pushTimer);pushTimer=setTimeout(()=>syncNow(false),1500);}
+function openSync(){
+  const cfg=syncCfg();
+  document.getElementById('syncUrl').value=cfg?cfg.url:(DEFAULT_DB_URL||'');
+  document.getElementById('syncCode').value=cfg?cfg.code:'';
+  document.getElementById('syncModal').classList.add('show');refreshSyncLabel();
+}
+function closeSync(){document.getElementById('syncModal').classList.remove('show');}
+async function connectSync(){
+  const url=cleanUrl(document.getElementById('syncUrl').value),code=document.getElementById('syncCode').value.trim();
+  if(!/^https:\/\/[^\/\s]+\.(firebaseio\.com|firebasedatabase\.app)$/i.test(url)){alert('Database URL sahi nahi hy.\nMisal: https://myapp-default-rtdb.firebaseio.com');return;}
+  if(code.length<8){alert('Secret code kam az kam 8 characters ka rakhein (jitna lamba utna mehfooz).');return;}
+  const cfg={url:url,code:code};
+  setSyncState('⏳ Connecting...');
+  try{
+    const id=ledgerId(code);
+    const remote=parseRemote(await cloudReq(cfg,id,'GET'));
+    const localHas=data.receive.length>0||data.pay.length>0;
+    if(!remote){await pushLocal(cfg,id,Math.max(getRev(REV_KEY),1));}
+    else if(!localHas){pullRemote(remote);}
+    else if(confirm('Cloud par pehly se data mojood hy.\n\nOK = Cloud ka data is device par lein (is device ka data replace hoga)\nCancel = Is device ka data cloud par bhej dein (cloud ka purana data replace hoga)'))pullRemote(remote);
+    else await pushLocal(cfg,id,Math.max(getRev(REV_KEY),remote.rev)+1);
+    lsSet(SYNC_CFG,JSON.stringify(cfg));lsSet(LASTSYNC_KEY,String(Date.now()));
+    refreshSyncLabel();closeSync();alert('Cloud sync on ho gaya ✅');
+  }catch(e){setSyncState('⚠️ '+syncErrText(e));alert('Connect nahi hua: '+syncErrText(e));}
+}
+function disconnectSync(){
+  if(!syncCfg()){closeSync();return;}
+  if(!confirm('Cloud sync band kar dein? Is device ka data safe rahy ga, cloud ka data bhi delete nahi hoga.'))return;
+  try{localStorage.removeItem(SYNC_CFG);localStorage.removeItem(LASTSYNC_KEY);}catch(e){}
+  refreshSyncLabel();closeSync();
+}
+window.addEventListener('online',()=>syncNow(false));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow(false);});
+setInterval(()=>{if(!document.hidden)syncNow(false);},30000);
+setTimeout(()=>{refreshSyncLabel();syncNow(false);},800);
+// ===== END CLOUD SYNC =====
+
+// ===== FILE EXPORT (Chrome, Android WebView, Capacitor APK) =====
+function isNativeApp(){try{return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(e){return false;}}
+function appToast(t){const e=document.getElementById('navToast');if(!e)return;e.textContent=t;e.style.display='block';clearTimeout(appToast._t);appToast._t=setTimeout(()=>{e.style.display='none';},2500);}
+function blobToBase64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(blob);});}
+// returns: 'shared' | 'saved' | 'downloaded' | 'cancel' | 'unsupported'
+async function exportFile(blob,name,title,opts){
+  const shareOnly=!!(opts&&opts.shareOnly);
+  const P=(window.Capacitor&&window.Capacitor.Plugins)||{};
+  if(P.Filesystem&&P.Share){ // Capacitor APK with Filesystem + Share plugins
+    try{
+      const w=await P.Filesystem.writeFile({path:name,data:await blobToBase64(blob),directory:'CACHE'});
+      await P.Share.share({title:title||name,dialogTitle:title||name,files:[w.uri]});
+      return 'shared';
+    }catch(e){if(/cancel/i.test(String(e&&e.message||e)))return 'cancel';}
+  }
+  if(shareOnly||isNativeApp()){ // plain APK WebView cannot download blobs, so only the share sheet can work
+    try{
+      const f=new File([blob],name,{type:blob.type});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:title||name});return 'shared';}
+    }catch(e){if(e&&e.name==='AbortError')return 'cancel';}
+    return 'unsupported';
+  }
+  if(window.showSaveFilePicker){ // desktop Chrome: real "Save as" window
+    try{
+      const ext=(name.split('.').pop()||'').toLowerCase();
+      const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:ext.toUpperCase()+' file',accept:{[blob.type||'application/octet-stream']:['.'+ext]}}]});
+      const w=await h.createWritable();await w.write(blob);await w.close();return 'saved';
+    }catch(e){if(e&&e.name==='AbortError')return 'cancel';}
+  }
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},4000);
+  return 'downloaded';
+}
+function exportFeedback(st,what){
+  if(st==='saved')appToast('✅ File save ho gayi');
+  else if(st==='downloaded')appToast('⬇️ Download shuru hua');
+  else if(st==='unsupported')alert('Is APK main bill ki file save/share available nahi hy.\n\nBill upar screen par nazar aa raha hy, screenshot le kar share kar sakty hain. Ya SHARE button se bill text ki shakal main WhatsApp par bhej dein.');
+}
+function waNumber(phone){let d=String(phone||'').replace(/[^0-9]/g,'');if(d.indexOf('00')===0)d=d.slice(2);else if(d.charAt(0)==='0')d='92'+d.slice(1);return d;}
+function openWhatsAppText(phone,text){window.open('https://wa.me/'+waNumber(phone)+'?text='+encodeURIComponent(text),'_blank');}
+// ===== END FILE EXPORT =====
+
+// ===== BACKUP & RESTORE =====
+function openBackup(){document.getElementById('backupMsg').textContent='';document.getElementById('backupModal').classList.add('show');}
+function closeBackup(){document.getElementById('backupModal').classList.remove('show');}
+function backupJson(){return JSON.stringify(data,null,2);}
+function backupName(){const d=new Date(),p=n=>String(n).padStart(2,'0');return 'money-ledger-backup-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json';}
+function backupMsg(t){const e=document.getElementById('backupMsg');if(e)e.textContent=t;}
+async function backupSave(){
+  try{
+    const st=await exportFile(new Blob([backupJson()],{type:'application/json'}),backupName(),'Money Ledger Backup');
+    if(st==='saved')backupMsg('✅ File save ho gayi.');
+    else if(st==='downloaded')backupMsg('⬇️ Download shuru hua. File Downloads folder main milni chahiye. Na mile to COPY BACKUP TEXT istemal karein.');
+    else if(st==='shared')backupMsg('✅ Share/Save ho gaya.');
+    else if(st==='unsupported')backupMsg('Is APK main file save available nahi. COPY BACKUP TEXT istemal karein, phir text ko WhatsApp/Notes main save kar lein.');
+  }catch(e){backupMsg('File save nahi ho saki. COPY BACKUP TEXT istemal karein.');}
+}
+async function backupShare(){
+  try{
+    const st=await exportFile(new Blob([backupJson()],{type:'application/json'}),backupName(),'Money Ledger Backup',{shareOnly:true});
+    if(st==='shared'){backupMsg('✅ Share ho gaya.');return;}
+    if(st==='cancel')return;
+    if(navigator.share){await navigator.share({title:'Money Ledger Backup',text:backupJson()});backupMsg('✅ Text ki shakal main share ho gaya.');return;}
+    backupMsg('Is device par share available nahi. COPY BACKUP TEXT istemal karein.');
+  }catch(e){if(e&&e.name==='AbortError')return;backupMsg('Share nahi ho saka. COPY BACKUP TEXT istemal karein.');}
+}
+async function backupCopy(){
+  const json=backupJson(),ta=document.getElementById('backupPaste');
+  ta.value=json; // also visible here, so it can be selected and copied by hand
+  try{await navigator.clipboard.writeText(json);backupMsg('✅ Copy ho gaya. Ab WhatsApp / Notes main paste karke save kar lein.');return;}catch(e){}
+  try{ta.focus();ta.select();if(document.execCommand('copy')){backupMsg('✅ Copy ho gaya. Ab WhatsApp / Notes main paste karke save kar lein.');return;}}catch(e){}
+  backupMsg('Text neechay box main aa gaya hy. Usay select karke khud copy kar lein.');
+}
+function applyRestore(parsed){
+  if(!parsed||!Array.isArray(parsed.receive)||!Array.isArray(parsed.pay))throw new Error('bad');
+  if(!confirm('Restore karne se is waqt ka sara data replace ho jaye ga. Jari rakhein?'))return false;
+  data=parsed;save();return true;
+}
+function importData(){
+  const input=document.getElementById('backupFile');input.value='';
+  input.onchange=function(e){
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    const r=new FileReader();
+    r.onload=function(){try{if(applyRestore(JSON.parse(r.result))){backupMsg('✅ Backup restore ho gaya.');alert('Backup restored');}}catch(err){alert('Invalid file');}};
+    r.onerror=function(){alert('File parh nahi saka');};
+    r.readAsText(file);
+  };
+  input.click();
+}
+function restoreFromText(){
+  const t=document.getElementById('backupPaste').value.trim();
+  if(!t){backupMsg('Pehle backup text paste karein.');return;}
+  try{if(applyRestore(JSON.parse(t))){backupMsg('✅ Backup restore ho gaya.');alert('Backup restored');}}catch(err){alert('Invalid backup text');}
+}
+// ===== END BACKUP & RESTORE =====
+
+// ===== NAVIGATION: hardware Back + Back/Home buttons =====
+(function(){
+  let silent=false,exitArmed=false,exitTimer=null;
+  const $all=sel=>Array.prototype.slice.call(document.querySelectorAll(sel));
+  const openModals=()=>$all('.modal.show');
+  const anyModal=()=>openModals().length>0;
+  const stateOf=()=>(history.state&&history.state.ml)||null;
+  function toast(t){const e=document.getElementById('navToast');if(!e)return;e.textContent=t;e.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>{e.style.display='none';},2000);}
+  function closeTop(){
+    const list=openModals();if(!list.length)return false;
+    const m=list[list.length-1],b=m.querySelector('.close');
+    if(b)b.click();else m.classList.remove('show');
+    return true;
+  }
+  function goHome(){
+    for(let i=0;i<8&&anyModal();i++)closeTop();
+    openModals().forEach(m=>m.classList.remove('show'));
+    reconcile();
+  }
+  function guardHome(){if(stateOf()==='base'&&!anyModal()&&!exitArmed)history.pushState({ml:'home'},'');}
+  function reconcile(){
+    if(silent)return;
+    const st=stateOf(),open=anyModal();
+    if(open&&st!=='modal'){exitArmed=false;clearTimeout(exitTimer);history.pushState({ml:'modal'},'');}
+    else if(!open&&st==='modal'){silent=true;history.back();}
+  }
+  window.addEventListener('popstate',function(e){
+    const st=e.state&&e.state.ml;
+    if(silent){silent=false;guardHome();reconcile();return;}
+    if(anyModal()){ // user pressed Back while a page was open: go to the previous page
+      closeTop();reconcile();
+      if(!anyModal()&&stateOf()==='base')guardHome();
+      return;
+    }
+    if(st==='base'){ // at home: press Back twice to leave the app
+      exitArmed=true;toast('Bahar nikalne ke liye dobara Back dabayen');
+      clearTimeout(exitTimer);
+      exitTimer=setTimeout(()=>{exitArmed=false;guardHome();},2000);
+    }else if(st==='modal'){reconcile();}
+  });
+  new MutationObserver(reconcile).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+  // Back / Home buttons on every page
+  $all('.modal-box').forEach(function(box){
+    const bar=document.createElement('div');bar.className='nav-bar';
+    bar.innerHTML='<button type="button" class="nav-btn" data-nav="back">← Back</button><button type="button" class="nav-btn" data-nav="home">🏠 Home</button>';
+    box.insertBefore(bar,box.firstChild);
+  });
+  document.addEventListener('click',function(e){
+    const b=e.target.closest&&e.target.closest('[data-nav]');if(!b)return;
+    if(b.getAttribute('data-nav')==='home')goHome();else closeTop();
+  });
+  try{history.replaceState({ml:'base'},'');history.pushState({ml:'home'},'');}catch(e){}
+})();
+// ===== END NAVIGATION =====
+
+// ===== FLOATING MINI CALCULATOR =====
+let calcExpr='';
+function toggleCalc(){document.getElementById('calcBox').classList.toggle('show');clampToScreen(document.getElementById('calcBox'));}
+function clampToScreen(el){
+  if(!el.style.left && !el.style.top) return;
+  let l=parseFloat(el.style.left), t=parseFloat(el.style.top);
+  const maxX=window.innerWidth-el.offsetWidth-4, maxY=window.innerHeight-el.offsetHeight-4;
+  l=Math.max(4,Math.min(l,maxX));t=Math.max(4,Math.min(t,maxY));
+  el.style.left=l+'px';el.style.top=t+'px';
+}
+// Generic drag-anywhere helper (mouse + touch via Pointer Events).
+// `el` = the element that actually moves, `handle` = the part you press to start dragging.
+// Returns a function you can call to check "was this last press a drag (not a tap)?"
+function makeDraggable(el, handle, posKey){
+  handle=handle||el;
+  let sx=0, sy=0, ox=0, oy=0, dragging=false, dragged=false;
+  const saved=posKey && localStorage.getItem(posKey);
+  if(saved){
+    try{ const pos=JSON.parse(saved);
+      el.style.left=Math.max(4,Math.min(pos.left,window.innerWidth-60))+'px';
+      el.style.top=Math.max(4,Math.min(pos.top,window.innerHeight-60))+'px';
+      el.style.right='auto';el.style.bottom='auto';
+    }catch(e){}
+  }
+  function down(e){
+    dragging=true;dragged=false;
+    const r=el.getBoundingClientRect();
+    sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;
+    el.style.left=ox+'px';el.style.top=oy+'px';
+    el.style.right='auto';el.style.bottom='auto';
+    try{handle.setPointerCapture(e.pointerId);}catch(err){}
+  }
+  function move(e){
+    if(!dragging)return;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(Math.abs(dx)>5||Math.abs(dy)>5)dragged=true;
+    let nx=ox+dx, ny=oy+dy;
+    nx=Math.max(4,Math.min(nx,window.innerWidth-el.offsetWidth-4));
+    ny=Math.max(4,Math.min(ny,window.innerHeight-el.offsetHeight-4));
+    el.style.left=nx+'px';el.style.top=ny+'px';
+  }
+  function up(){
+    if(dragging && dragged && posKey){
+      try{localStorage.setItem(posKey,JSON.stringify({left:parseFloat(el.style.left),top:parseFloat(el.style.top)}));}catch(e){}
+    }
+    dragging=false;
+  }
+  handle.addEventListener('pointerdown',down);
+  handle.addEventListener('pointermove',move);
+  handle.addEventListener('pointerup',up);
+  handle.addEventListener('pointercancel',up);
+  return ()=>dragged;
+}
+let calcHist='', calcJustEq=false;
+function calcFmt(x){return x.replace(/\*/g,'×').replace(/\//g,'÷');}
+function calcRefresh(){
+  document.getElementById('calcDisplay').textContent=calcExpr===''?'0':calcFmt(calcExpr);
+  document.getElementById('calcHist').textContent=calcHist;
+}
+function calcInput(v){
+  if(calcExpr==='Error') calcExpr='';
+  // after "=", a new number starts fresh; an operator continues from the result
+  if(calcJustEq && !/[+\-*/]/.test(v)) calcExpr='';
+  calcJustEq=false; calcHist='';
+  if(/[+\-*/]/.test(v) && calcExpr!=='' && /[+\-*/]$/.test(calcExpr)){ calcExpr=calcExpr.slice(0,-1)+v; }
+  else if(v==='.'){ const parts=calcExpr.split(/[+\-*/]/); if(parts[parts.length-1].includes('.')) return; calcExpr+=v; }
+  else { calcExpr+=v; }
+  calcRefresh();
+}
+function calcClear(){calcExpr='';calcHist='';calcJustEq=false;calcRefresh();}
+function calcBackspace(){if(calcJustEq){calcExpr='';}else{calcExpr=calcExpr.slice(0,-1);}calcHist='';calcJustEq=false;calcRefresh();}
+function calcPercent(){
+  if(!calcExpr||!/^[0-9+\-*/.\s]+$/.test(calcExpr)) return;
+  try{ const r=Function('"use strict";return ('+calcExpr+')')()/100; calcHist=calcFmt(calcExpr)+' %'; calcExpr=String(Math.round(r*10000)/10000); calcJustEq=true; }catch(e){ calcExpr='Error'; calcHist=''; }
+  calcRefresh();
+}
+function calcEquals(){
+  if(!calcExpr) return;
+  try{
+    if(!/^[0-9+\-*/.\s]+$/.test(calcExpr)) throw 'invalid';
+    const result=Function('"use strict";return ('+calcExpr+')')();
+    if(!isFinite(result)) throw 'invalid';
+    calcHist=calcFmt(calcExpr)+' =';
+    calcExpr=String(Math.round(result*100)/100);
+    calcJustEq=true;
+  }catch(e){ calcExpr='Error'; calcHist=''; calcJustEq=false; }
+  calcRefresh();
+}
+
+(function(){
+  const fab=document.getElementById('calcFab');
+  const box=document.getElementById('calcBox');
+  const head=document.getElementById('calcHead');
+  const fabWasDragged=makeDraggable(fab, fab, 'ml_calc_fab_pos');
+  makeDraggable(box, head, 'ml_calc_box_pos');
+  fab.addEventListener('click',function(e){
+    if(fabWasDragged()){e.preventDefault();e.stopPropagation();return;}
+    toggleCalc();
+  });
+})();
+
+// Keyboard support for the floating calculator (desktop)
+document.addEventListener('keydown',function(e){
+  const box=document.getElementById('calcBox');
+  if(!box||!box.classList.contains('show')) return;
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  const t=e.target, tag=t&&t.tagName;
+  // don't hijack typing in other fields of the app
+  if(t && t.id!=='calcDisplay' && (tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||t.isContentEditable)) return;
+  const k=e.key;
+  if(/^[0-9]$/.test(k)||k==='.'||k===','){ calcInput(k===','?'.':k); }
+  else if(k==='+'||k==='-'||k==='*'||k==='/'){ calcInput(k); }
+  else if(k==='x'||k==='X'){ calcInput('*'); }
+  else if(k==='%'){ calcPercent(); }
+  else if(k==='Enter'||k==='='){ calcEquals(); }
+  else if(k==='Backspace'){ calcBackspace(); }
+  else if(k==='Delete'||k==='c'||k==='C'){ calcClear(); }
+  else if(k==='Escape'){ toggleCalc(); }
+  else return;
+  e.preventDefault();
+});
+
+initTheme();render();
+</script>
+<script>(function dlRuntime(cfg){
+  
+function utf8(s){return new TextEncoder().encode(s);}
+var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+var H0=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+function sha256(bytes){
+  var l=bytes.length,total=((l+9+63)>>6)<<6,m=new Uint8Array(total),i,off;
+  m.set(bytes);m[l]=0x80;
+  var dv=new DataView(m.buffer);
+  dv.setUint32(total-8,Math.floor(l/536870912));dv.setUint32(total-4,(l<<3)>>>0);
+  var h=H0.slice(),w=new Array(64);
+  for(off=0;off<total;off+=64){
+    for(i=0;i<16;i++)w[i]=dv.getUint32(off+i*4);
+    for(i=16;i<64;i++){
+      var a=w[i-15],b=w[i-2];
+      var s0=((a>>>7)|(a<<25))^((a>>>18)|(a<<14))^(a>>>3);
+      var s1=((b>>>17)|(b<<15))^((b>>>19)|(b<<13))^(b>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0;
+    }
+    var A=h[0],B=h[1],C=h[2],D=h[3],E=h[4],F=h[5],G=h[6],Hh=h[7];
+    for(i=0;i<64;i++){
+      var S1=((E>>>6)|(E<<26))^((E>>>11)|(E<<21))^((E>>>25)|(E<<7));
+      var ch=(E&F)^(~E&G);
+      var t1=(Hh+S1+ch+K[i]+w[i])>>>0;
+      var S0=((A>>>2)|(A<<30))^((A>>>13)|(A<<19))^((A>>>22)|(A<<10));
+      var mj=(A&B)^(A&C)^(B&C);
+      var t2=(S0+mj)>>>0;
+      Hh=G;G=F;F=E;E=(D+t1)>>>0;D=C;C=B;B=A;A=(t1+t2)>>>0;
+    }
+    h[0]=(h[0]+A)>>>0;h[1]=(h[1]+B)>>>0;h[2]=(h[2]+C)>>>0;h[3]=(h[3]+D)>>>0;
+    h[4]=(h[4]+E)>>>0;h[5]=(h[5]+F)>>>0;h[6]=(h[6]+G)>>>0;h[7]=(h[7]+Hh)>>>0;
+  }
+  var out=new Uint8Array(32),odv=new DataView(out.buffer);
+  for(i=0;i<8;i++)odv.setUint32(i*4,h[i]);
+  return out;
+}
+function hex(b){var s='',i;for(i=0;i<b.length;i++)s+=(b[i]<16?'0':'')+b[i].toString(16);return s;}
+function mod(a,m){var r=a%m;return r>=0n?r:r+m;}
+function pw(b,e,m){var r=1n;b=mod(b,m);while(e>0n){if(e&1n)r=r*b%m;b=b*b%m;e>>=1n;}return r;}
+var M64=(1n<<64n)-1n,K512=null,H512=null;
+function iroot(n,k){var lo=0n,hi=1n<<BigInt(Math.ceil(n.toString(2).length/k)+1),kk=BigInt(k),mid;while(lo<hi){mid=(lo+hi+1n)>>1n;if(mid**kk<=n)lo=mid;else hi=mid-1n;}return lo;}
+function sha512init(){
+  var pr=[],c=2,i,j,ok;
+  while(pr.length<80){ok=true;for(j=0;j<pr.length&&pr[j]*pr[j]<=c;j++){if(c%pr[j]===0){ok=false;break;}}if(ok)pr.push(c);c++;}
+  K512=[];H512=[];
+  for(i=0;i<80;i++)K512.push(iroot(BigInt(pr[i])<<192n,3)&M64);
+  for(i=0;i<8;i++)H512.push(iroot(BigInt(pr[i])<<128n,2)&M64);
+}
+function rotr(x,n){return((x>>BigInt(n))|(x<<BigInt(64-n)))&M64;}
+function sha512(bytes){
+  if(!K512)sha512init();
+  var l=bytes.length,total=((l+17+127)>>7)<<7,m=new Uint8Array(total),i,j,off;
+  m.set(bytes);m[l]=0x80;
+  var bits=BigInt(l)*8n;
+  for(i=0;i<8;i++)m[total-1-i]=Number((bits>>BigInt(8*i))&255n);
+  var h=H512.slice(),w=new Array(80);
+  for(off=0;off<total;off+=128){
+    for(i=0;i<16;i++){var v=0n;for(j=0;j<8;j++)v=(v<<8n)|BigInt(m[off+i*8+j]);w[i]=v;}
+    for(i=16;i<80;i++){
+      var s0=rotr(w[i-15],1)^rotr(w[i-15],8)^(w[i-15]>>7n);
+      var s1=rotr(w[i-2],19)^rotr(w[i-2],61)^(w[i-2]>>6n);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)&M64;
+    }
+    var a=h[0],b=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+    for(i=0;i<80;i++){
+      var S1=rotr(e,14)^rotr(e,18)^rotr(e,41);
+      var ch=(e&f)^((M64^e)&g);
+      var t1=(hh+S1+ch+K512[i]+w[i])&M64;
+      var S0=rotr(a,28)^rotr(a,34)^rotr(a,39);
+      var mj=(a&b)^(a&c)^(b&c);
+      var t2=(S0+mj)&M64;
+      hh=g;g=f;f=e;e=(d+t1)&M64;d=c;c=b;b=a;a=(t1+t2)&M64;
+    }
+    h[0]=(h[0]+a)&M64;h[1]=(h[1]+b)&M64;h[2]=(h[2]+c)&M64;h[3]=(h[3]+d)&M64;
+    h[4]=(h[4]+e)&M64;h[5]=(h[5]+f)&M64;h[6]=(h[6]+g)&M64;h[7]=(h[7]+hh)&M64;
+  }
+  var out=new Uint8Array(64);
+  for(i=0;i<8;i++)for(j=0;j<8;j++)out[i*8+j]=Number((h[i]>>BigInt(56-8*j))&255n);
+  return out;
+}
+/* Ed25519 (RFC 8032), pure BigInt, no external libs */
+var EP=(1n<<255n)-19n,EL=(1n<<252n)+27742317777372353535851937790883648493n;
+function einv(a){return pw(a,EP-2n,EP);}
+var ED=mod(-121665n*einv(121666n),EP),EI=pw(2n,(EP-1n)/4n,EP);
+function leNum(b){var n=0n,i;for(i=b.length-1;i>=0;i--)n=(n<<8n)|BigInt(b[i]);return n;}
+function numLe(n,len){var o=new Uint8Array(len),i;for(i=0;i<len;i++){o[i]=Number(n&255n);n>>=8n;}return o;}
+function recoverX(y,sign){
+  var y2=y*y%EP,x2=mod((y2-1n)*einv(ED*y2+1n),EP);
+  if(x2===0n)return sign?null:0n;
+  var x=pw(x2,(EP+3n)/8n,EP);
+  if(mod(x*x-x2,EP)!==0n)x=x*EI%EP;
+  if(mod(x*x-x2,EP)!==0n)return null;
+  if(Number(x&1n)!==sign)x=EP-x;
+  return x;
+}
+function eadd(p,q){
+  var A=mod((p[1]-p[0])*(q[1]-q[0]),EP),B=mod((p[1]+p[0])*(q[1]+q[0]),EP),
+      C=mod(2n*p[3]*q[3]*ED,EP),Dd=mod(2n*p[2]*q[2],EP),
+      E=B-A,F=Dd-C,G=Dd+C,H=B+A;
+  return [mod(E*F,EP),mod(G*H,EP),mod(F*G,EP),mod(E*H,EP)];
+}
+function emul(s,p){var q=[0n,1n,1n,0n];while(s>0n){if(s&1n)q=eadd(q,p);p=eadd(p,p);s>>=1n;}return q;}
+function ecompress(p){
+  var zi=einv(p[2]),x=p[0]*zi%EP,y=p[1]*zi%EP,o=numLe(y,32);
+  if(x&1n)o[31]|=0x80;
+  return o;
+}
+function edecompress(b){
+  if(b.length!==32)return null;
+  var c=new Uint8Array(b),sign=c[31]>>7;c[31]&=0x7f;
+  var y=leNum(c);if(y>=EP)return null;
+  var x=recoverX(y,sign);if(x===null)return null;
+  return [x,y,1n,x*y%EP];
+}
+var EBY=4n*einv(5n)%EP,EBX=recoverX(EBY,0),EB=[EBX,EBY,1n,EBX*EBY%EP];
+function ecat(){var n=0,i,o,k=0;for(i=0;i<arguments.length;i++)n+=arguments[i].length;o=new Uint8Array(n);for(i=0;i<arguments.length;i++){o.set(arguments[i],k);k+=arguments[i].length;}return o;}
+function edVerify(sig,msg,pub){
+  sig=new Uint8Array(sig);pub=new Uint8Array(pub);msg=new Uint8Array(msg);
+  if(sig.length!==64||pub.length!==32)return false;
+  var A=edecompress(pub),R=edecompress(sig.slice(0,32));
+  if(!A||!R)return false;
+  var S=leNum(sig.slice(32));if(S>=EL)return false;
+  var h=leNum(sha512(ecat(sig.slice(0,32),pub,msg)))%EL;
+  var lhs=ecompress(emul(S,EB)),rhs=ecompress(eadd(R,emul(h,A))),i,d=0;
+  for(i=0;i<32;i++)d|=lhs[i]^rhs[i];
+  return d===0;
+}
+
+function dash4(s){return (s.match(/.{1,4}/g)||[]).join('-');}
+
+  function fp(){
+    var n=navigator,s=screen,tz='';
+    try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+    return [n.platform||'',n.hardwareConcurrency||0,n.language||'',tz,Math.max(s.width,s.height)+'x'+Math.min(s.width,s.height),s.colorDepth||0].join('||');
+  }
+  function store(k,v){
+    try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);return v;}catch(e){return null;}
+  }
+  function randHex(){
+    var a=new Uint8Array(16),i;
+    try{crypto.getRandomValues(a);}catch(e){for(i=0;i<16;i++)a[i]=Math.floor(Math.random()*256);}
+    return hex(a);
+  }
+  function installId(){
+    var r=store('dl_install_id');
+    if(!r){r=randHex();store('dl_install_id',r);if(store('dl_install_id')!==r)r='nostore';}
+    return r;
+  }
+  var SK='dl_unlocked_'+cfg.appId;
+  function hexBytes(h){var o=new Uint8Array(h.length/2),i;for(i=0;i<o.length;i++)o[i]=parseInt(h.substr(i*2,2),16);return o;}
+  function b32dec(s){
+    var A='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',bits='',i,v;
+    if(s.length!==103)return null;
+    for(i=0;i<s.length;i++){v=A.indexOf(s.charAt(i));if(v<0)return null;bits+=('0000'+v.toString(2)).slice(-5);}
+    if(bits.slice(512)!=='000')return null;
+    var out=new Uint8Array(64);for(i=0;i<64;i++)out[i]=parseInt(bits.substr(i*8,8),2);
+    return out;
+  }
+  function start(){
+    var ov=document.getElementById('dlOverlay');
+    if(!ov){
+      var holder=document.createElement('div');
+      holder.innerHTML=cfg.styleHtml+cfg.overlayHtml;
+      while(holder.firstChild)document.body.appendChild(holder.firstChild);
+      ov=document.getElementById('dlOverlay');
+    }
+    var idEl=document.getElementById('dlDeviceId'),inp=document.getElementById('dlKeyInput'),
+        btn=document.getElementById('dlUnlockBtn'),msg=document.getElementById('dlMsg');
+    var devId=dash4(hex(sha256(utf8(fp()+'||'+installId()))).slice(0,16).toUpperCase());
+    var plain=devId.replace(/-/g,'');
+    var MSG=utf8('HTML2REPO-LOCK-v16::'+plain+'::'+cfg.appId);
+    var mtoken='M:'+hex(sha256(utf8(cfg.hash+'::'+plain+'::'+cfg.appId)));
+    function checkKey(norm){
+      try{var sg=b32dec(norm);return !!sg&&edVerify(sg,MSG,hexBytes(cfg.pub));}catch(e){return false;}
+    }
+    idEl.textContent=devId;
+    var prevOverflow=document.body.style.overflow,frozen=[];
+    function freezePage(){
+      var i,c=document.body.children;
+      for(i=0;i<c.length;i++){if(c[i]!==ov&&!c[i].hasAttribute('inert')){c[i].setAttribute('inert','');frozen.push(c[i]);}}
+      document.body.style.overflow='hidden';
+    }
+    function openPage(){
+      var i;
+      for(i=0;i<frozen.length;i++)frozen[i].removeAttribute('inert');
+      ov.style.display='none';
+      document.body.style.overflow=prevOverflow;
+    }
+    var saved=store(SK);
+    if(saved&&(saved===mtoken||checkKey(saved))){openPage();return;}
+    freezePage();
+    function show(t,ok){msg.className=ok?'ok':'';msg.textContent=t;}
+    var FK='dl_fails_'+cfg.appId,fails=parseInt(store(FK)||'0',10)||0,UK='dl_until_'+cfg.appId,until=parseInt(store(UK)||'0',10)||0;
+    function tryUnlock(){
+      var now=Date.now();
+      if(now<until){show('Too many attempts. Wait '+Math.ceil((until-now)/1000)+'s.');return;}
+      var raw=inp.value.trim();
+      if(!raw)return;
+      var norm=raw.toUpperCase().replace(/[^A-Z2-7]/g,''),tok=null;
+      if(norm.length===103&&checkKey(norm))tok=norm;
+      else if(hex(sha256(utf8(raw)))===cfg.hash)tok=mtoken;
+      if(tok){
+        store(FK,'0');store(SK,tok);show('Unlocked.',true);setTimeout(openPage,250);
+      }else{
+        fails++;store(FK,String(fails));
+        if(fails>=5){fails=0;store(FK,'0');until=Date.now()+30000;store(UK,String(until));show('Too many attempts. Wait 30s.');}
+        else show('Invalid key or password.');
+      }
+    }
+    btn.addEventListener('click',tryUnlock);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')tryUnlock();});
+    function copyId(){
+      function done(){show('Device ID copied.',true);setTimeout(function(){msg.textContent='';msg.className='';},1500);}
+      function fallback(){
+        try{var t=document.createElement('textarea');t.value=devId;t.style.position='fixed';t.style.opacity='0';
+          document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);done();}catch(e){}
+      }
+      try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(devId).then(done,fallback);return;}}catch(e){}
+      fallback();
+    }
+    idEl.addEventListener('click',copyId);
+    var onBtn=document.getElementById('dlOnlineBtn');
+    if(onBtn&&cfg.api){
+      onBtn.style.display='';
+      onBtn.addEventListener('click',function(){
+        show('Contacting server...',true);
+        var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort();},15000);
+        fetch(String(cfg.api).replace(/\/+$/,'')+'/activate',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({deviceId:plain,appId:cfg.appId}),signal:ctl?ctl.signal:undefined})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          clearTimeout(to);
+          if(d.status==='approved'&&d.key){
+            var n=String(d.key).toUpperCase().replace(/[^A-Z2-7]/g,'');
+            if(n.length===103&&checkKey(n)){store(SK,n);show('Unlocked.',true);setTimeout(openPage,250);}
+            else show('Server sent an invalid key.');
+          }else if(d.status==='pending')show('Request sent. Waiting for approval - tap again later.',true);
+          else if(d.status==='revoked')show('Access has been revoked.');
+          else show('Online activation is not available for this app.');
+        })
+        .catch(function(){clearTimeout(to);show('Cannot reach the server. Check your internet.');});
+      });
+    }
+    var cpBtn=document.getElementById('dlCopyBtn'),waBtn=document.getElementById('dlWaBtn');
+    if(cpBtn)cpBtn.addEventListener('click',copyId);
+    if(waBtn)waBtn.addEventListener('click',function(){
+      var text='Device ID: '+devId+'\nApp ID: '+cfg.appId+'\nPlease send me the activation key.';
+      var num=String(cfg.wa||'').replace(/[^0-9]/g,'');
+      var url='https://wa.me/'+(num?num:'')+'?text='+encodeURIComponent(text);
+      var w=null;
+      try{w=window.open(url,'_blank');}catch(e){}
+      if(!w){try{window.location.href=url;}catch(e){}}
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})({"pub":"44c30f732fff18694e463082177391182a4752ada24bdbdb0a85f073aa4ec18f","api":"https://html2repo-activate.moondeveloperspk.workers.dev","hash":"90246a123bcd2cae256e8c4cb7b6c1b5e63dad89c6db5f2dbf1434d330595feb","wa":"923226327876","appId":"moneyledger","styleHtml":"<style>\n#dlOverlay{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:radial-gradient(circle at 20% 0%, rgba(0,229,255,0.08), transparent 40%), radial-gradient(circle at 90% 100%, rgba(255,204,51,0.06), transparent 40%), rgba(3,5,10,0.98);font-family:'Share Tech Mono', monospace;}\n#dlBox{width:100%;max-width:380px;border:1px solid #1c2b3d;background:#0e1420;box-shadow:0 0 0 1px rgba(0,229,255,0.05), 0 20px 60px rgba(0,0,0,0.6);color:#d7e3f4;}\n#dlBox .dlHead{padding:14px 20px;border-bottom:1px solid #1c2b3d;background:linear-gradient(180deg, rgba(0,229,255,0.06), transparent);font-weight:700;font-size:13px;letter-spacing:2px;color:#00e5ff;}\n#dlBox .dlBody{padding:20px;}\n#dlBox .dlLock{font-size:30px;text-align:center;margin-bottom:10px;}\n#dlBox .dlDeviceLabel{font-size:11px;letter-spacing:1.5px;color:#5f7286;margin-bottom:4px;}\n#dlBox .dlDeviceId{font-size:15px;letter-spacing:1px;color:#ffcc33;background:#0b111c;border:1px solid #1c2b3d;padding:10px 12px;text-align:center;word-break:break-all;margin-bottom:8px;cursor:pointer;}\n#dlBox .dlRow{display:flex;gap:8px;margin-bottom:16px;}\n#dlBox .dlRow button{flex:1;width:auto;padding:9px 6px;font-size:11px;letter-spacing:1px;}\n#dlBox .dlRow #dlWaBtn{border-color:#25d366;color:#25d366;}\n#dlBox .dlRow #dlWaBtn:hover{background:#25d366;color:#04200e;}\n#dlBox input[type=text]{width:100%;background:#0b111c;border:1px solid #1c2b3d;color:#d7e3f4;padding:10px 12px;font-family:'Share Tech Mono', monospace;font-size:16px;outline:none;margin-bottom:10px;box-sizing:border-box;}\n#dlBox input:focus{border-color:#00e5ff;}\n#dlBox button{width:100%;padding:12px;background:transparent;border:1px solid #00e5ff;color:#00e5ff;font-weight:700;font-size:12px;letter-spacing:2px;cursor:pointer;}\n#dlBox button:hover{background:#00e5ff;color:#00151a;}\n#dlMsg{font-size:12px;margin-top:10px;min-height:16px;color:#ff5566;text-align:center;}\n#dlMsg.ok{color:#39ff88;}\n#dlNote{font-size:11px;color:#5f7286;margin-top:14px;line-height:1.6;text-align:center;}\n</style>","overlayHtml":"<div id=\"dlOverlay\"><div id=\"dlBox\"><div class=\"dlHead\">DEVICE LOCK</div><div class=\"dlBody\"><div class=\"dlLock\">&#128274;</div><div class=\"dlDeviceLabel\">THIS DEVICE'S ID &mdash; tap to copy</div><div class=\"dlDeviceId\" id=\"dlDeviceId\">DETECTING...</div><div class=\"dlRow\"><button id=\"dlCopyBtn\" type=\"button\">COPY ID</button><button id=\"dlWaBtn\" type=\"button\">SEND ON WHATSAPP</button></div><button id=\"dlOnlineBtn\" type=\"button\" style=\"display:none;margin-bottom:10px\">ACTIVATE ONLINE</button><input type=\"text\" id=\"dlKeyInput\" placeholder=\"ACTIVATION KEY or MASTER PASSWORD\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\"><button id=\"dlUnlockBtn\">&gt;&gt; UNLOCK</button><div id=\"dlMsg\"></div><div id=\"dlNote\">Send the Device ID above to get an activation key for this device, or enter the master password.</div></div></div></div>"});</script></body>
+</html>
